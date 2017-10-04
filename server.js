@@ -16,6 +16,7 @@ const server = express()
 
 // Create the WebSockets server
 const wss = new SocketServer({ server });
+var numberOfUsersConnected = 0;
 
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
@@ -42,30 +43,34 @@ wss.on('connection', (ws) => {
     else if (messageJS.type == "postNotification") {
 
       let notificationJS = JSON.parse(message);
-      notificationJS["type"] = "incomingMessage";
-      console.log('type: ' + notificationJS["type"] + ' content: ' + notificationJS["content"]);
+      notificationJS["type"] = "incomingNotification";
+      console.log('type: ' + notificationJS["type"] + ' content: ' + notificationJS["oldUsername"] + ' has changed to ' + notificationJS["username"]);
       message = JSON.stringify(notificationJS);
       wss.broadcast(message);
     } else {
       console.log("Defaulting on the server side");
     }
-
-
-
     
   });
+
+  //Counting number of connected clients
+
+  for (let item of wss.clients) {
+    numberOfUsersConnected ++;
+  }
   
   
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => console.log('Client disconnected'));
+    numberOfUsersConnected --;
 });
 
 // Function for broadcasting a message
 wss.broadcast = function(data) {
   wss.clients.forEach(function(client) {
     if(client.readyState === client.OPEN) {
-      console.log("Im inside the broadcast function")
       client.send(data);
     }
   });
 }
+console.log("Number of users: ", numberOfUsersConnected);
