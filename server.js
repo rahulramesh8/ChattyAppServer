@@ -16,7 +16,7 @@ const server = express()
 
 // Create the WebSockets server
 const wss = new SocketServer({ server });
-var numberOfUsersConnected = 0;
+
 
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
@@ -24,6 +24,9 @@ var numberOfUsersConnected = 0;
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
+  wss.broadcast(wss.clients.size);
+  console.log("Current size is: ", wss.clients.size)
+
   ws.on('message', function incoming(message) {
 
     //Handling MESSAGE from Client
@@ -55,15 +58,30 @@ wss.on('connection', (ws) => {
 
   //Counting number of connected clients
 
+  var numberOfUsersConnected = 0;
   for (let item of wss.clients) {
     numberOfUsersConnected ++;
   }
+  // console.log("Number of connected users: ", numberOfUsersConnected)
   
   
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
-    numberOfUsersConnected --;
+  ws.on('close', () => {console.log('Client disconnected')
+  wss.broadcast(wss.clients.size);
+  console.log("Current size is: ", wss.clients.size)
+  });
+
 });
+
+// wss.broadcast(numberOfUsersConnected);
+
+// wss.on('connection', function connection(ws) {
+//   ws.on('connection', function(message) {
+//      wss.broadcast(wss.clients.size);
+//      console.log("Current size is: ", wss.clients.size)
+//   })
+// })
+
 
 // Function for broadcasting a message
 wss.broadcast = function(data) {
@@ -73,4 +91,4 @@ wss.broadcast = function(data) {
     }
   });
 }
-console.log("Number of users: ", numberOfUsersConnected);
+// console.log("Number of users: ", numberOfUsersConnected);
