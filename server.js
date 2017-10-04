@@ -24,8 +24,12 @@ const wss = new SocketServer({ server });
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
-  wss.broadcast(wss.clients.size);
-  console.log("Current size is: ", wss.clients.size)
+  var clientsWhenCreated = wss.clients.size;
+  
+  var incomingCounter = { type: "clientCounter",
+  size: wss.clients.size}
+  incomingCounter = JSON.stringify(incomingCounter);
+  wss.broadcast(incomingCounter);
 
   ws.on('message', function incoming(message) {
 
@@ -67,20 +71,13 @@ wss.on('connection', (ws) => {
   
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {console.log('Client disconnected')
-  wss.broadcast(wss.clients.size);
   console.log("Current size is: ", wss.clients.size)
+
+  wss.broadcast(incomingCounter);
   });
 
 });
 
-// wss.broadcast(numberOfUsersConnected);
-
-// wss.on('connection', function connection(ws) {
-//   ws.on('connection', function(message) {
-//      wss.broadcast(wss.clients.size);
-//      console.log("Current size is: ", wss.clients.size)
-//   })
-// })
 
 
 // Function for broadcasting a message
