@@ -17,6 +17,10 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
+//Creating a color list 
+const colors = ["#4286f4", "#ef2d17", "#0be521", "#f2f202"];
+
+
 
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
@@ -26,10 +30,17 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   var clientsWhenCreated = wss.clients.size;
   
+  //Counting number of users
   var incomingCounter = { type: "clientCounter",
   size: wss.clients.size}
   incomingCounter = JSON.stringify(incomingCounter);
   wss.broadcast(incomingCounter);
+
+  //Sending a random color to App
+  var textColor = { type: "clientColor",
+  color: colors[Math.floor(Math.random() * colors.length)]}
+  textColor = JSON.stringify(textColor);
+  wss.broadcast(textColor);
 
   ws.on('message', function incoming(message) {
 
@@ -80,6 +91,7 @@ wss.on('connection', (ws) => {
 
 
 
+
 // Function for broadcasting a message
 wss.broadcast = function(data) {
   wss.clients.forEach(function(client) {
@@ -88,4 +100,12 @@ wss.broadcast = function(data) {
     }
   });
 }
-// console.log("Number of users: ", numberOfUsersConnected);
+
+function pickRandomColor(obj) {
+  var result;
+  var count = 0;
+  for (var prop in obj)
+      if (Math.random() < 1/++count)
+         result = prop;
+  return result;
+}
