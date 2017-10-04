@@ -25,16 +25,32 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   ws.on('message', function incoming(message) {
 
-    //Making the json string back into a JS object
-    messageJS = JSON.parse(message);
+    //Handling MESSAGE from Client
+    let messageJS = JSON.parse(message);
+    if(messageJS.type == "postMessage") {
+      //Making the json string back into a JS object
+  
+      messageJS["id"] = uuidv1();
+      messageJS["type"] = "incomingMessage";
+      console.log('type: ' + messageJS["type"] + ' User ' + messageJS["username"] + " said " + messageJS["content"] + " with id: "+ messageJS["id"]);
+      message = JSON.stringify(messageJS);
+      //Broadcasting message to all clients
+      wss.broadcast(message);
 
-    messageJS["id"] = uuidv1();
+    } 
+    //Handling NOTIFICATION from client
+    else if (messageJS.type == "postNotification") {
 
-    console.log('User ' + messageJS["username"] + " said " + messageJS["content"] + " with id: "+ messageJS["id"]);
-    message = JSON.stringify(messageJS);
+      let notificationJS = JSON.parse(message);
+      notificationJS["type"] = "incomingMessage";
+      console.log('type: ' + notificationJS["type"] + ' content: ' + notificationJS["content"]);
+      message = JSON.stringify(notificationJS);
+      wss.broadcast(message);
+    } else {
+      console.log("Defaulting on the server side");
+    }
 
-    //Broadcasting to all clients
-    wss.broadcast(message);
+
 
     
   });
