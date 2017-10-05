@@ -44,19 +44,19 @@ wss.on('connection', (ws) => {
 
   ws.on('message', function incoming(message) {
 
-    //Handling MESSAGE from Client
     let messageJS = JSON.parse(message);
+
+    //Handling MESSAGE from client
     if(messageJS.type == "postMessage") {
-      //Making the json string back into a JS object
-  
+
       messageJS["id"] = uuidv1();
       messageJS["type"] = "incomingMessage";
       console.log('type: ' + messageJS["type"] + ' User ' + messageJS["username"] + " said " + messageJS["content"] + " with id: "+ messageJS["id"]);
       message = JSON.stringify(messageJS);
       //Broadcasting message to all clients
       wss.broadcast(message);
-
     } 
+
     //Handling NOTIFICATION from client
     else if (messageJS.type == "postNotification") {
 
@@ -67,30 +67,20 @@ wss.on('connection', (ws) => {
       wss.broadcast(message);
     } else {
       console.log("Defaulting on the server side");
-    }
-    
+    }   
   });
 
   //Counting number of connected clients
-
   var numberOfUsersConnected = 0;
   for (let item of wss.clients) {
     numberOfUsersConnected ++;
-  }
-  // console.log("Number of connected users: ", numberOfUsersConnected)
-  
+  } 
   
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {console.log('Client disconnected')
-  console.log("Current size is: ", wss.clients.size)
-
-  wss.broadcast(incomingCounter);
+    wss.broadcast(incomingCounter);
   });
-
 });
-
-
-
 
 // Function for broadcasting a message
 wss.broadcast = function(data) {
@@ -99,13 +89,4 @@ wss.broadcast = function(data) {
       client.send(data);
     }
   });
-}
-
-function pickRandomColor(obj) {
-  var result;
-  var count = 0;
-  for (var prop in obj)
-      if (Math.random() < 1/++count)
-         result = prop;
-  return result;
 }
