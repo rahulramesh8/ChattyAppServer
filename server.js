@@ -36,11 +36,11 @@ wss.on('connection', (ws) => {
   incomingCounter = JSON.stringify(incomingCounter);
   wss.broadcast(incomingCounter);
 
-  //Sending a random color to App
+  //Sending a random color to App to a specific client
   var textColor = { type: "clientColor",
   color: colors[Math.floor(Math.random() * colors.length)]}
   textColor = JSON.stringify(textColor);
-  wss.broadcast(textColor);
+  ws.send(textColor);
 
   ws.on('message', function incoming(message) {
 
